@@ -175,6 +175,7 @@ int main() {
     printf("Server is listening on port %d\n", PORT);
 
     fd_set read_fds;
+    int[] worker_fds[MAX_CLIENTS];
     FD_ZERO(&read_fds);
     FD_SET(server_socket, &read_fds);
     int max_fd = server_socket;
@@ -198,6 +199,7 @@ int main() {
                     int client_soc = accept(server_socket, NULL, NULL);
                     if (client_soc != -1) {
                         FD_SET(client_soc, &read_fds);
+                        worker_ids[client_count] = client_soc;
                         client_count++;
                         if (client_soc > max_fd) {
                             max_fd = client_soc;
