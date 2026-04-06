@@ -51,8 +51,105 @@ int write_global(const void *buf, size_t count, fd_set *read_fds, int max_fd, in
     return 1;
 }
 
+HouseDataPacket* init_empty_packet(int capacity) {
+    HouseDataPacket* packet = malloc(sizeof(HouseDataPacket));
+    packet->data = malloc(capacity * sizeof(HouseData));
+    packet->size = 0;
+    packet->capacity = capacity;
+    return packet;
+}
+
+int add_to_packet(HouseDataPacket* packet, HouseData data) {
+    if (packet->size == packet->capacity) {
+        packet->capacity *= 2;
+        HouseData* new_data = realloc(packet->data, packet->capacity * sizeof(HouseData));
+        if (new_data == NULL) {
+            return -1;
+        }
+        packet->data = new_data;
+    }
+    packet->data[packet->size] = data;
+    packet->size++;
+    return 1;
+}
+
+void free_packet(HouseDataPacket* packet) {
+    free(packet->data);
+    free(packet);
+}
+
+
+HouseDataPacket* read_packet(FILE* file) {
+    if (file == NULL) {
+        return NULL;
+    }
+
+    char line[1024];
+    // initialize packet with capacity of 100
+    HouseDataPacket* packet = init_empty_packet(100);
+    if (packet == NULL) {
+        return NULL;
+    }   
+
+
+    // skip the first line
+    if (fgets(line, sizeof(line), file) == NULL) {
+        return NULL;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        char *token = strtok(line, ",");
+        if (token == NULL) {
+            continue;
+        }
+        float price = strtof(token, NULL);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) {
+            continue;
+        }
+        float sqft = strtof(token, NULL);
+
+        // Making the data
+        HouseData data = {
+            .sqft = sqft,
+            .price = price,
+        };
+
+        // Error checking
+        if (add_to_packet(packet, data) == -1) {
+            free_packet(packet);
+            return NULL;
+        }
+    }
+    return packet;
+}
+
+void print_packet(HouseDataPacket* packet) {
+    for (int i = 0; i < packet->size; i++) {
+        printf("Price: %f, Sqft: %f\n", packet->data[i].price, packet->data[i].sqft);
+    }
+}
+
+
 int main() {
     int MAX_ITERATIONS = 10;
+
+    // Read the data from the CSV file
+    FILE* file = fopen("Housing.csv", "r");
+    if (file == NULL) {
+        perror("file opening failed");
+        exit(1);
+    }
+    HouseDataPacket* packet = read_packet(file);
+    if (packet == NULL) {
+        perror("packet reading failed");
+        exit(1);
+    }
+    fclose(file);
+
+    // TODO: Remove before submition
+    print_packet(packet);
 
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
@@ -176,6 +273,9 @@ int main() {
     }
 
     // Training complete
+
+    // Freeing the packet
+    free_packet(packet);
 
     // Getting user data
     
