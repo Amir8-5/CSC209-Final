@@ -8,4 +8,9 @@ typedef struct {
     float bias;
 } model_t;
 
+typedef struct {
+    float sqft;
+    float bias;
+} HouseData
+
 #endif
