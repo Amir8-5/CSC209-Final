@@ -1,6 +1,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#define MAX_CLIENTS 3
 #include <stdint.h>
 
 typedef struct {
