@@ -25,6 +25,7 @@ server
 
 # VS Code
 .vscode/
+*.csv
 
 # Clangd
 .clangd

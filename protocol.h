@@ -10,7 +10,13 @@ typedef struct {
 
 typedef struct {
     float sqft;
-    float bias;
-} HouseData
+    float price;
+} HouseData;
+
+typedef struct {
+    HouseData *data;
+    int size;
+    int capacity;
+} HouseDataPacket;
 
 #endif
