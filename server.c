@@ -175,7 +175,7 @@ int main() {
     printf("Server is listening on port %d\n", PORT);
 
     fd_set read_fds;
-    int[] worker_fds[MAX_CLIENTS];
+    int worker_fds[MAX_CLIENTS];
     FD_ZERO(&read_fds);
     FD_SET(server_socket, &read_fds);
     int max_fd = server_socket;
