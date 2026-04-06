@@ -1,0 +1,37 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+client
+server
+
+# VS Code
+.vscode/
+
+# Clangd
+.clangd
+.clangd/
+.cache/
+compile_commands.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
