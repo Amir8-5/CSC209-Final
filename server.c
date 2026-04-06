@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <string.h>
 #include "protocol.h"
 
 int read_all(int fd, void *buf, size_t count) {
@@ -173,7 +174,39 @@ int main() {
             }
         }
     }
+
+    // Training complete
+
+    // Getting user data
     
+    
+    char input_buf[256];
+    while (1) {
+        printf("Enter square footage (or 'q' to quit): ");
+        if (fgets(input_buf, sizeof(input_buf), stdin) == NULL) {
+            break;
+        }
+
+        // Remove trailing newline
+        input_buf[strcspn(input_buf, "\n")] = '\0';
+
+        if (strcmp(input_buf, "q") == 0) {
+            // The user has quit
+            break;
+        }
+
+        char *endptr;
+        float sqft = strtof(input_buf, &endptr);
+
+        // Error checking conversion
+        if (endptr == input_buf || *endptr != '\0') {
+            printf("Invalid input. Please enter a valid number or 'q'.\n");
+        } else {
+            float predicted_weight = (sqft * global_weight) + global_bias;
+            printf("Predicted weight: %f\n", predicted_weight);
+        }
+    }
+
     close(server_socket);
     return 0;
 }
