@@ -33,8 +33,8 @@ int write_all(int fd, const void *buf, size_t count) {
     return 1;
 }
 
-model_t computer_gradient(HouseData *data, int n, model_t current) {
-    model_t grad = {0.0, 0.0}
+model_t compute_gradient(HouseData *data, int n, model_t current) {
+    model_t grad = {0.0, 0.0};
 
     for(int i = 0; i < n; i++_{
         float prediction = current.weight * data[i].sqft + current.bias;
@@ -71,23 +71,23 @@ int main() {
     printf("Connected to server\n");
 
     int num_points;
-    int read_status = read_all(sock, &num_points, sizeof(int));
+    int read_status = read_all(client_socket, &num_points, sizeof(int));
     if (read_status == 0) {
         printf("Server disconnected.\n");
-        break;
+        exit(1);
     } else if (read_status == -1) {
         perror("read_all failed");
-        break;
+        exit(1);
     }
     
-    house_data_t *my_shard = malloc(sizeof(house_data_t) * num_points);
-    read_status = read_all(sock, my_shard, sizeof(house_data_t) * num_points);
+    HouseData *my_shard = malloc(sizeof(HouseData) * num_points);
+    read_status = read_all(client_socket, my_shard, sizeof(HouseData) * num_points);
     if (read_status == 0) {
         printf("Server disconnected.\n");
-        break;
+        exit(1);
     } else if (read_status == -1) {
         perror("read_all failed");
-        break;
+        exit(1);
     }
     
     printf("Worker ready. Received shard of %d points.\n", num_points);
@@ -105,7 +105,7 @@ int main() {
             break;
         }
 
-        model_t gradient = compute_gradient(my_shard, num_points, current_model)
+        model_t gradient = compute_gradient(my_shard, num_points, server_model);
 
         int write_status = write_all(client_socket, &gradient, sizeof(model_t));
         
@@ -116,7 +116,8 @@ int main() {
     }
     
     printf("Training complete. Shutting down worker.\n");
-    free(my_shard);
-    close(client_socket);
+cleanup:
+    if (my_shard != NULL) free(my_shard);
+    if (client_socket != -1) close(client_socket);
     return 0;
 }
