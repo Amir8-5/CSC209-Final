@@ -133,6 +133,7 @@ void print_packet(HouseDataPacket* packet) {
 
 
 int main() {
+    int MAX_ITERATIONS = 1000;
     // Read the data from the CSV file
     FILE* file = fopen("Housing.csv", "r");
     if (file == NULL) {
