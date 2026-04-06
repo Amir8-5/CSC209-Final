@@ -36,14 +36,14 @@ int write_all(int fd, const void *buf, size_t count) {
 model_t compute_gradient(HouseData *data, int n, model_t current) {
     model_t grad = {0.0, 0.0};
 
-    for(int i = 0; i < n; i++_{
+    for(int i = 0; i < n; i++) {
         float prediction = current.weight * data[i].sqft + current.bias;
         float error = prediction - data[i].price;
         grad.weight += error * data[i].sqft;
         grad.bias += error;
     }
-    grad.weight /= num_points;
-    grad.bias /= num_points;
+    grad.weight /= n;
+    grad.bias /= n;
 }
 
 int main() {
