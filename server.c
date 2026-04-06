@@ -133,8 +133,6 @@ void print_packet(HouseDataPacket* packet) {
 
 
 int main() {
-    int MAX_ITERATIONS = 10;
-
     // Read the data from the CSV file
     FILE* file = fopen("Housing.csv", "r");
     if (file == NULL) {
@@ -183,9 +181,10 @@ int main() {
 
     float global_weight = 0;
     float global_bias = 0;
+    float learning_rate = 0.00000001;
     int global_iteration = 0;
 
-    while (client_count < 3) {
+    while (client_count < MAX_CLIENTS) {
         fd_set tmp_fds = read_fds;
         if (select(max_fd + 1, &tmp_fds, NULL, NULL, NULL) == -1) {
             perror("select failed");
@@ -207,6 +206,12 @@ int main() {
                 }
             }
         }
+    }
+
+    int shard_size = packet->size/3;
+    for(int i = 0; i < MAX_CLIENTS; i++) {
+        write_all(worker_fds[i], &shard_size, sizeof(int));
+        write_all(worker_fds[i], &(packet->data)[i * shard_size], sizeof(HouseData) * shard_size);
     }
 
     for (; global_iteration < MAX_ITERATIONS; global_iteration++) {
@@ -251,8 +256,8 @@ int main() {
         }
 
         if (client_count > 0 && worker_responses == client_count) {
-            global_weight += delta_weight_sum / (float) client_count;
-            global_bias += delta_bias_sum / (float) client_count;
+            global_weight -= learning_rate * delta_weight_sum / (float) client_count;
+            global_bias -= learning_rate * delta_bias_sum / (float) client_count;
         } else if (client_count == 0) {
             break;
         }
@@ -278,7 +283,6 @@ int main() {
     free_packet(packet);
 
     // Getting user data
-    
     
     char input_buf[256];
     while (1) {
