@@ -44,6 +44,7 @@ model_t compute_gradient(HouseData *data, int n, model_t current) {
     }
     grad.weight /= n;
     grad.bias /= n;
+    return grad;
 }
 
 int main() {
@@ -116,7 +117,7 @@ int main() {
     }
     
     printf("Training complete. Shutting down worker.\n");
-cleanup:
+    
     if (my_shard != NULL) free(my_shard);
     if (client_socket != -1) close(client_socket);
     return 0;
